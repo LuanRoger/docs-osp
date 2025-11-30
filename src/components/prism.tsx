@@ -261,7 +261,7 @@ const Prism: React.FC<PrismProps> = ({
       yawY: number,
       pitchX: number,
       rollZ: number,
-      out: Float32Array,
+      out: Float32Array
     ) => {
       const cy = Math.cos(yawY),
         sy = Math.sin(yawY);
@@ -376,7 +376,7 @@ const Prism: React.FC<PrismProps> = ({
           yaw,
           pitch,
           roll,
-          rotBuf,
+          rotBuf
         );
 
         if (NOISE_IS_ZERO) {
@@ -395,7 +395,7 @@ const Prism: React.FC<PrismProps> = ({
           yaw,
           pitch,
           roll,
-          rotBuf,
+          rotBuf
         );
         if (TS < 1e-6) continueRAF = false;
       } else {
@@ -444,7 +444,7 @@ const Prism: React.FC<PrismProps> = ({
         if (onPointerMove)
           window.removeEventListener(
             "pointermove",
-            onPointerMove as EventListener,
+            onPointerMove as EventListener
           );
         window.removeEventListener("mouseleave", onLeave);
         window.removeEventListener("blur", onBlur);
