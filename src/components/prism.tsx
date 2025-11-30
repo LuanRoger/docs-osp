@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { Renderer, Triangle, Program, Mesh } from "ogl";
+import { Mesh, Program, Renderer, Triangle } from "ogl";
+import type React from "react";
+import { useEffect, useRef } from "react";
 
 type PrismProps = {
   height?: number;
@@ -42,26 +43,25 @@ const Prism: React.FC<PrismProps> = ({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
-    const H = Math.max(0.001, height);
-    const BW = Math.max(0.001, baseWidth);
-    const BASE_HALF = BW * 0.5;
-    const GLOW = Math.max(0.0, glow);
-    const NOISE = Math.max(0.0, noise);
-    const offX = offset?.x ?? 0;
-    const offY = offset?.y ?? 0;
-    const SAT = transparent ? 1.5 : 1;
-    const SCALE = Math.max(0.001, scale);
-    const HUE = hueShift || 0;
-    const CFREQ = Math.max(0.0, colorFrequency || 1);
-    const BLOOM = Math.max(0.0, bloom || 1);
-    const RSX = 1;
-    const RSY = 1;
-    const RSZ = 1;
-    const TS = Math.max(0, timeScale || 1);
-    const HOVSTR = Math.max(0, hoverStrength || 1);
-    const INERT = Math.max(0, Math.min(1, inertia || 0.12));
+    const config = createPrismConfig({
+      height,
+      baseWidth,
+      glow,
+      noise,
+      offset,
+      transparent,
+      scale,
+      hueShift,
+      colorFrequency,
+      bloom,
+      timeScale,
+      hoverStrength,
+      inertia,
+    });
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const renderer = new Renderer({
@@ -217,26 +217,26 @@ const Prism: React.FC<PrismProps> = ({
       uniforms: {
         iResolution: { value: iResBuf },
         iTime: { value: 0 },
-        uHeight: { value: H },
-        uBaseHalf: { value: BASE_HALF },
+        uHeight: { value: config.H },
+        uBaseHalf: { value: config.BASE_HALF },
         uUseBaseWobble: { value: 1 },
         uRot: { value: new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]) },
-        uGlow: { value: GLOW },
+        uGlow: { value: config.GLOW },
         uOffsetPx: { value: offsetPxBuf },
-        uNoise: { value: NOISE },
-        uSaturation: { value: SAT },
-        uScale: { value: SCALE },
-        uHueShift: { value: HUE },
-        uColorFreq: { value: CFREQ },
-        uBloom: { value: BLOOM },
-        uCenterShift: { value: H * 0.25 },
-        uInvBaseHalf: { value: 1 / BASE_HALF },
-        uInvHeight: { value: 1 / H },
-        uMinAxis: { value: Math.min(BASE_HALF, H) },
+        uNoise: { value: config.NOISE },
+        uSaturation: { value: config.SAT },
+        uScale: { value: config.SCALE },
+        uHueShift: { value: config.HUE },
+        uColorFreq: { value: config.CFREQ },
+        uBloom: { value: config.BLOOM },
+        uCenterShift: { value: config.H * 0.25 },
+        uInvBaseHalf: { value: 1 / config.BASE_HALF },
+        uInvHeight: { value: 1 / config.H },
+        uMinAxis: { value: Math.min(config.BASE_HALF, config.H) },
         uPxScale: {
-          value: 1 / ((gl.drawingBufferHeight || 1) * 0.1 * SCALE),
+          value: 1 / ((gl.drawingBufferHeight || 1) * 0.1 * config.SCALE),
         },
-        uTimeScale: { value: TS },
+        uTimeScale: { value: config.TS },
       },
     });
     const mesh = new Mesh(gl, { geometry, program });
@@ -247,10 +247,10 @@ const Prism: React.FC<PrismProps> = ({
       renderer.setSize(w, h);
       iResBuf[0] = gl.drawingBufferWidth;
       iResBuf[1] = gl.drawingBufferHeight;
-      offsetPxBuf[0] = offX * dpr;
-      offsetPxBuf[1] = offY * dpr;
+      offsetPxBuf[0] = config.offX * dpr;
+      offsetPxBuf[1] = config.offY * dpr;
       program.uniforms.uPxScale.value =
-        1 / ((gl.drawingBufferHeight || 1) * 0.1 * SCALE);
+        1 / ((gl.drawingBufferHeight || 1) * 0.1 * config.SCALE);
     };
     const ro = new ResizeObserver(resize);
     ro.observe(container);
@@ -293,23 +293,27 @@ const Prism: React.FC<PrismProps> = ({
       return out;
     };
 
-    const NOISE_IS_ZERO = NOISE < 1e-6;
+    const NOISE_IS_ZERO = config.NOISE < 1e-6;
     let raf = 0;
     const t0 = performance.now();
     const startRAF = () => {
-      if (raf) return;
+      if (raf) {
+        return;
+      }
       raf = requestAnimationFrame(render);
     };
     const stopRAF = () => {
-      if (!raf) return;
+      if (!raf) {
+        return;
+      }
       cancelAnimationFrame(raf);
       raf = 0;
     };
 
     const rnd = () => Math.random();
-    const wX = (0.3 + rnd() * 0.6) * RSX;
-    const wY = (0.2 + rnd() * 0.7) * RSY;
-    const wZ = (0.1 + rnd() * 0.5) * RSZ;
+    const wX = (0.3 + rnd() * 0.6) * config.RSX;
+    const wY = (0.2 + rnd() * 0.7) * config.RSY;
+    const wZ = (0.1 + rnd() * 0.5) * config.RSZ;
     const phX = rnd() * Math.PI * 2;
     const phZ = rnd() * Math.PI * 2;
 
@@ -359,58 +363,40 @@ const Prism: React.FC<PrismProps> = ({
       const time = (t - t0) * 0.001;
       program.uniforms.iTime.value = time;
 
-      let continueRAF = true;
-
-      if (animationType === "hover") {
-        const maxPitch = 0.6 * HOVSTR;
-        const maxYaw = 0.6 * HOVSTR;
-        targetYaw = (pointer.inside ? -pointer.x : 0) * maxYaw;
-        targetPitch = (pointer.inside ? pointer.y : 0) * maxPitch;
-        const prevYaw = yaw;
-        const prevPitch = pitch;
-        const prevRoll = roll;
-        yaw = lerp(prevYaw, targetYaw, INERT);
-        pitch = lerp(prevPitch, targetPitch, INERT);
-        roll = lerp(prevRoll, 0, 0.1);
-        program.uniforms.uRot.value = setMat3FromEuler(
-          yaw,
-          pitch,
-          roll,
-          rotBuf
-        );
-
-        if (NOISE_IS_ZERO) {
-          const settled =
-            Math.abs(yaw - targetYaw) < 1e-4 &&
-            Math.abs(pitch - targetPitch) < 1e-4 &&
-            Math.abs(roll) < 1e-4;
-          if (settled) continueRAF = false;
-        }
-      } else if (animationType === "3drotate") {
-        const tScaled = time * TS;
-        yaw = tScaled * wY;
-        pitch = Math.sin(tScaled * wX + phX) * 0.6;
-        roll = Math.sin(tScaled * wZ + phZ) * 0.5;
-        program.uniforms.uRot.value = setMat3FromEuler(
-          yaw,
-          pitch,
-          roll,
-          rotBuf
-        );
-        if (TS < 1e-6) continueRAF = false;
-      } else {
-        rotBuf[0] = 1;
-        rotBuf[1] = 0;
-        rotBuf[2] = 0;
-        rotBuf[3] = 0;
-        rotBuf[4] = 1;
-        rotBuf[5] = 0;
-        rotBuf[6] = 0;
-        rotBuf[7] = 0;
-        rotBuf[8] = 1;
-        program.uniforms.uRot.value = rotBuf;
-        if (TS < 1e-6) continueRAF = false;
-      }
+      const continueRAF = updateAnimation({
+        animationType,
+        time,
+        pointer,
+        config,
+        yaw,
+        pitch,
+        roll,
+        targetYaw,
+        targetPitch,
+        wX,
+        wY,
+        wZ,
+        phX,
+        phZ,
+        lerp,
+        setMat3FromEuler,
+        rotBuf,
+        program,
+        NOISE_IS_ZERO,
+        setRotation: (rotation: {
+          yaw: number;
+          pitch: number;
+          roll: number;
+          targetYaw: number;
+          targetPitch: number;
+        }) => {
+          yaw = rotation.yaw;
+          pitch = rotation.pitch;
+          roll = rotation.roll;
+          targetYaw = rotation.targetYaw;
+          targetPitch = rotation.targetPitch;
+        },
+      });
 
       renderer.render({ scene: mesh });
       if (continueRAF) {
@@ -421,14 +407,17 @@ const Prism: React.FC<PrismProps> = ({
     };
 
     interface PrismContainer extends HTMLElement {
-      __prismIO?: IntersectionObserver;
+      __prismIO?: IntersectionObserver | null;
     }
 
     if (suspendWhenOffscreen) {
       const io = new IntersectionObserver((entries) => {
         const vis = entries.some((e) => e.isIntersecting);
-        if (vis) startRAF();
-        else stopRAF();
+        if (vis) {
+          startRAF();
+        } else {
+          stopRAF();
+        }
       });
       io.observe(container);
       startRAF();
@@ -441,23 +430,25 @@ const Prism: React.FC<PrismProps> = ({
       stopRAF();
       ro.disconnect();
       if (animationType === "hover") {
-        if (onPointerMove)
+        if (onPointerMove) {
           window.removeEventListener(
             "pointermove",
             onPointerMove as EventListener
           );
+        }
         window.removeEventListener("mouseleave", onLeave);
         window.removeEventListener("blur", onBlur);
       }
       if (suspendWhenOffscreen) {
-        const io = (container as PrismContainer).__prismIO as
-          | IntersectionObserver
-          | undefined;
-        if (io) io.disconnect();
-        delete (container as PrismContainer).__prismIO;
+        const io = (container as PrismContainer).__prismIO;
+        if (io) {
+          io.disconnect();
+        }
+        (container as PrismContainer).__prismIO = null;
       }
-      if (gl.canvas.parentElement === container)
+      if (gl.canvas.parentElement === container) {
         container.removeChild(gl.canvas);
+      }
     };
   }, [
     height,
@@ -465,8 +456,7 @@ const Prism: React.FC<PrismProps> = ({
     animationType,
     glow,
     noise,
-    offset?.x,
-    offset?.y,
+    offset,
     scale,
     transparent,
     hueShift,
@@ -478,7 +468,183 @@ const Prism: React.FC<PrismProps> = ({
     suspendWhenOffscreen,
   ]);
 
-  return <div className="w-full h-full relative" ref={containerRef} />;
+  return <div className="relative h-full w-full" ref={containerRef} />;
 };
+
+type PrismConfigInput = {
+  height: number;
+  baseWidth: number;
+  glow: number;
+  noise: number;
+  offset: { x?: number; y?: number };
+  transparent: boolean;
+  scale: number;
+  hueShift: number;
+  colorFrequency: number;
+  bloom: number;
+  timeScale: number;
+  hoverStrength: number;
+  inertia: number;
+};
+
+type PrismConfig = {
+  H: number;
+  BASE_HALF: number;
+  GLOW: number;
+  NOISE: number;
+  offX: number;
+  offY: number;
+  SAT: number;
+  SCALE: number;
+  HUE: number;
+  CFREQ: number;
+  BLOOM: number;
+  RSX: number;
+  RSY: number;
+  RSZ: number;
+  TS: number;
+  HOVSTR: number;
+  INERT: number;
+};
+
+function createPrismConfig(input: PrismConfigInput): PrismConfig {
+  const H = Math.max(0.001, input.height);
+  const BW = Math.max(0.001, input.baseWidth);
+  return {
+    H,
+    BASE_HALF: BW * 0.5,
+    GLOW: Math.max(0.0, input.glow),
+    NOISE: Math.max(0.0, input.noise),
+    offX: input.offset?.x ?? 0,
+    offY: input.offset?.y ?? 0,
+    SAT: input.transparent ? 1.5 : 1,
+    SCALE: Math.max(0.001, input.scale),
+    HUE: input.hueShift || 0,
+    CFREQ: Math.max(0.0, input.colorFrequency || 1),
+    BLOOM: Math.max(0.0, input.bloom || 1),
+    RSX: 1,
+    RSY: 1,
+    RSZ: 1,
+    TS: Math.max(0, input.timeScale || 1),
+    HOVSTR: Math.max(0, input.hoverStrength || 1),
+    INERT: Math.max(0, Math.min(1, input.inertia || 0.12)),
+  };
+}
+
+type UpdateAnimationParams = {
+  animationType: "rotate" | "hover" | "3drotate";
+  time: number;
+  pointer: { x: number; y: number; inside: boolean };
+  config: PrismConfig;
+  yaw: number;
+  pitch: number;
+  roll: number;
+  targetYaw: number;
+  targetPitch: number;
+  wX: number;
+  wY: number;
+  wZ: number;
+  phX: number;
+  phZ: number;
+  lerp: (a: number, b: number, t: number) => number;
+  setMat3FromEuler: (
+    yawY: number,
+    pitchX: number,
+    rollZ: number,
+    out: Float32Array
+  ) => Float32Array;
+  rotBuf: Float32Array;
+  program: Program;
+  NOISE_IS_ZERO: boolean;
+  setRotation: (rotation: {
+    yaw: number;
+    pitch: number;
+    roll: number;
+    targetYaw: number;
+    targetPitch: number;
+  }) => void;
+};
+
+function updateAnimation(params: UpdateAnimationParams): boolean {
+  const { animationType } = params;
+
+  if (animationType === "hover") {
+    return updateHoverAnimation(params);
+  }
+  if (animationType === "3drotate") {
+    return update3DRotateAnimation(params);
+  }
+  return updateDefaultAnimation(params);
+}
+
+function updateHoverAnimation(params: UpdateAnimationParams): boolean {
+  const {
+    pointer,
+    config,
+    lerp,
+    setMat3FromEuler,
+    rotBuf,
+    program,
+    NOISE_IS_ZERO,
+    setRotation,
+  } = params;
+  let { yaw, pitch, roll, targetYaw, targetPitch } = params;
+
+  const maxPitch = 0.6 * config.HOVSTR;
+  const maxYaw = 0.6 * config.HOVSTR;
+  targetYaw = (pointer.inside ? -pointer.x : 0) * maxYaw;
+  targetPitch = (pointer.inside ? pointer.y : 0) * maxPitch;
+  const prevYaw = yaw;
+  const prevPitch = pitch;
+  const prevRoll = roll;
+  yaw = lerp(prevYaw, targetYaw, config.INERT);
+  pitch = lerp(prevPitch, targetPitch, config.INERT);
+  roll = lerp(prevRoll, 0, 0.1);
+  program.uniforms.uRot.value = setMat3FromEuler(yaw, pitch, roll, rotBuf);
+  setRotation({ yaw, pitch, roll, targetYaw, targetPitch });
+
+  if (NOISE_IS_ZERO) {
+    const settled =
+      Math.abs(yaw - targetYaw) < 1e-4 &&
+      Math.abs(pitch - targetPitch) < 1e-4 &&
+      Math.abs(roll) < 1e-4;
+    if (settled) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function update3DRotateAnimation(params: UpdateAnimationParams): boolean {
+  const { time, config, setMat3FromEuler, rotBuf, program, setRotation } =
+    params;
+  const { targetYaw, targetPitch } = params;
+
+  const tScaled = time * config.TS;
+  const yaw = tScaled * params.wY;
+  const pitch = Math.sin(tScaled * params.wX + params.phX) * 0.6;
+  const roll = Math.sin(tScaled * params.wZ + params.phZ) * 0.5;
+  program.uniforms.uRot.value = setMat3FromEuler(yaw, pitch, roll, rotBuf);
+  setRotation({ yaw, pitch, roll, targetYaw, targetPitch });
+
+  return config.TS >= 1e-6;
+}
+
+function updateDefaultAnimation(params: UpdateAnimationParams): boolean {
+  const { config, rotBuf, program } = params;
+
+  rotBuf[0] = 1;
+  rotBuf[1] = 0;
+  rotBuf[2] = 0;
+  rotBuf[3] = 0;
+  rotBuf[4] = 1;
+  rotBuf[5] = 0;
+  rotBuf[6] = 0;
+  rotBuf[7] = 0;
+  rotBuf[8] = 1;
+  program.uniforms.uRot.value = rotBuf;
+
+  return config.TS >= 1e-6;
+}
 
 export default Prism;
