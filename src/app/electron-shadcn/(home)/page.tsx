@@ -126,7 +126,7 @@ export default function HomePage() {
         </div>
         <FeatureCards features={features} />
       </div>
-      <Reveal className="-z-10 absolute inset-0 hidden translate-y-20 lg:block">
+      <Reveal className="-z-10 absolute inset-0 hidden lg:block">
         <Prism
           animationType="rotate"
           baseWidth={10}
