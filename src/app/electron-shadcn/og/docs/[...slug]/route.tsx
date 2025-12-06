@@ -18,7 +18,9 @@ export async function GET(
   return new ImageResponse(
     <DefaultImage
       description={page.data.description}
-      site="My App"
+      primaryColor="#0a0a0a"
+      primaryTextColor="#fafafa"
+      site="electron-shadcn"
       title={page.data.title}
     />,
     {
