@@ -7,6 +7,7 @@ import {
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import EditOnGitHub from "@/components/edit-on-github";
 import { getPageImage, source } from "@/lib/sources/electron-shadcn";
 import { getMDXComponents } from "@/mdx-components";
 
@@ -26,6 +27,7 @@ export default async function Page(
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
+        <EditOnGitHub app="/electron-shadcn" path={page.path} />
         <MDX
           components={getMDXComponents({
             a: createRelativeLink(source, page),
