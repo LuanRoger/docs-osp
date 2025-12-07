@@ -128,12 +128,10 @@ export default function HomePage() {
   return (
     <div className="relative inset-shadow-sm flex-1 overflow-hidden rounded-2xl border border-border p-4">
       <div className="flex flex-col items-center justify-center gap-5">
-        <div className="flex flex-col items-center gap-2">
-          <ElectronIcon className="size-16 fill-[#47848F]" />
-          <div className="flex gap-2">
-            <ViteIcon className="size-16 fill-[#646CFF]" />
-            <ReactIcon className="size-16 fill-[#61DAFB]" />
-          </div>
+        <div className="flex items-center gap-2">
+          <ElectronIcon className="size-16 fill-foreground" />
+          <ViteIcon className="size-16 fill-foreground" />
+          <ReactIcon className="size-16 fill-foreground" />
         </div>
         <h1 className="font-bold text-3xl">electron-shadcn</h1>
         <p className="font-medium text-lg">
