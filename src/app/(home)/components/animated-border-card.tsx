@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/a11y/noNoninteractiveElementInteractions: This is to animate the border of the card */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: This is to animate the border of the card */
 "use client";
 
 import { motion, useMotionTemplate, useMotionValue } from "motion/react";

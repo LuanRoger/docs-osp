@@ -6,19 +6,19 @@ import { cn } from "@/lib/utils/styles";
 
 type CanvasStrokeStyle = string | CanvasGradient | CanvasPattern;
 
-interface GridOffset {
+type GridOffset = {
   x: number;
   y: number;
-}
+};
 
-interface SquaresProps {
+type SquaresProps = {
   direction?: "diagonal" | "up" | "right" | "down" | "left";
   speed?: number;
   borderColor?: CanvasStrokeStyle;
   squareSize?: number;
   hoverFillColor?: CanvasStrokeStyle;
   className?: string;
-}
+};
 
 const Squares: React.FC<SquaresProps> = ({
   direction = "right",
