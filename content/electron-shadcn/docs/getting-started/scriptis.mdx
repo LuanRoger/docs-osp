@@ -9,10 +9,15 @@ Here are the most commonly used scripts:
 | `npm run start` | Start the app in development mode |
 | `npm run package` | Package the app into an executable bundle |
 | `npm run make` | Generate platform-specific distributables (.exe, .dmg, etc.) |
-| `npm run lint` | Run ESLint to check code quality |
-| `npm run format:write` | Format code with Prettier |
+| `npm run publish` | Publish the app to configured publishers |
+| `npm run check` | Run Ultracite to check code quality |
+| `npm run fix` | Run Ultracite to fix code issues |
+| `npm run bump-ui` | Update shadcn-ui components |
 | `npm run test` | Run unit tests with Vitest |
+| `npm run test:watch` | Run Vitest in watch mode |
+| `npm run test:unit` | Run unit tests with Vitest (interactive) |
 | `npm run test:e2e` | Run end-to-end tests with Playwright |
+| `npm run test:all` | Run both unit and E2E tests |
 
 <Callout type="warn">
 The Playwright tests require the app to be built first. Run `npm run package` or `npm run make` before running `npm run test:e2e`. Head over to the [Testing](../testing) page for more details.
